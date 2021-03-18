@@ -1,8 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-
-
 export default function Game() {
     // 
     //  STATE
@@ -69,7 +67,7 @@ export default function Game() {
         localStorage.removeItem('player-hands');
         let newHands = {
             dealer: {
-                hand: '',
+                hand: [],
                 score: 0,
                 aceAsEleven: false
             },
@@ -78,7 +76,7 @@ export default function Game() {
         for (let i = 0; i < numOfPlayers; i++) {
             let newPlayer = {
                 name: `player_${i}`,
-                hand: '',
+                hand: [],
                 score: 0,
                 aceAsEleven: false
             }
@@ -90,19 +88,48 @@ export default function Game() {
         // console.log(`hands_STATE in state at END of create players: \n ${hands_STATE}`);
     }
 
-    const drawCards = () => {
+    const drawOneCard = async () => {
+        // const url = `https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=${numOfDecks}`;
+        // const response = await fetch(url);
+        // const data = await response.json();
+        const url = `${deckURL_STATE}draw/?count=1`;
+        const response = await fetch("https://deckofcardsapi.com/api/deck/b2vy3srifz67/draw/?count=1");
+        const data = await response.json();
+        const cardData = data.cards[0].code;
+        await console.log(`\nCard data in drawOneCard: ${JSON.stringify(cardData)}\n`);
+        // const cardCode = await cardData.cards[0].code;
+        // await fetch(`${deckURL_STATE}pile/discard/add/?cards=${cardCode}`);
+        // return cardCode;
 
     }
 
     const dealCards = async (numOfPlayers) => {
-        drawCards();
+        //  Get currently saved hands from localStorage
+        const playerHands = hands_STATE;
+        //  dealCounter = total number of players, plus 1 for the dealer
+        const dealCounter = +numOfPlayers + 1;
+        
+        //  TWICE, count up from 0, where 'i' is the player number,
+        for (let i = 0; i < 2; i++) {
+            for (let i = 0; i < dealCounter; i++) {
+                const newCard = drawOneCard();
+                //  except for the last number which will be the dealer's hand
+                if (i === (dealCounter - 1)) {
+                    // playerHands.dealer.hand.push(newCard);
+                    console.log('playerHands is\n', playerHands);
+                } else {
+                    console.log('i is', i);
+                }
+            }
+        }
     }
 
     const startGame = async (data) => {
         // console.log('data from startGame: \n', data);
-        shuffleDeck();
-        createPlayers(data.selectNumOfPlayers);
-        dealCards(data.selectNumOfPlayers);
+        await shuffleDeck();
+        await createPlayers(data.selectNumOfPlayers);
+        // dealCards(data.selectNumOfPlayers);
+        await drawOneCard();
         // console.log('submitted form');
     }
 
